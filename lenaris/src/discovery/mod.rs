@@ -49,20 +49,22 @@ impl TryFrom<Result<String, sys_info::Error>> for OperatingSystem {
         let os_type = os_type.to_lowercase();
         let os_type = os_type.as_str();
 
-        let os_release = match sys_info::linux_os_release() {
-            Ok(release) => release,
-            Err(err) => {
-                return Err(Error::Failed(format!(
-                    "unable to fetch linux release: {}",
-                    err
-                )))
-            }
-        };
-
-        let distro = Distro::try_from(os_release.id_like)?;
-
         match os_type {
-            "linux" => Ok(Self::Linux(distro)),
+            "linux" => {
+                let os_release = match sys_info::linux_os_release() {
+                    Ok(release) => release,
+                    Err(err) => {
+                        return Err(Error::Failed(format!(
+                            "unable to fetch linux release: {}",
+                            err
+                        )))
+                    }
+                };
+
+                let distro = Distro::try_from(os_release.id_like)?;
+
+                Ok(Self::Linux(distro))
+            }
             "darwin" => Ok(Self::Darwin),
             os_type => Err(Error::UnsupportedSystem(os_type.to_owned())),
         }
@@ -89,14 +91,20 @@ mod tests {
             Ok(os.to_owned())
         }
 
+        #[cfg(target_os = "linux")]
+        {
+            let linux_os = OperatingSystem::try_from(mock_os("Linux", None));
+            assert!(linux_os.map_err(|err| eprintln!("{err}")).is_ok());
+        }
+
+        #[cfg(target_os = "macos")]
+        {
+            let mac_os = OperatingSystem::try_from(mock_os("Darwin", None));
+            assert!(mac_os.map_err(|err| eprintln!("{err}")).is_ok());
+        }
+
         let windows_os = OperatingSystem::try_from(mock_os("Windows", None));
-        let linux_os = OperatingSystem::try_from(mock_os("Linux", None));
-        let mac_os = OperatingSystem::try_from(mock_os("Darwin", None));
-
         assert!(windows_os.is_err());
-
-        assert!(linux_os.is_ok());
-        assert!(mac_os.is_ok());
 
         let unknown_os =
             OperatingSystem::try_from(mock_os("", Some(sys_info::Error::UnsupportedSystem)));

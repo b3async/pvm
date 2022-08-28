@@ -10,4 +10,3 @@ path = "src/main.rs"
 
 [dependencies]
 lenaris = { path = "../lenaris" }
-directories = "4.0.1"
