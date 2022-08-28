@@ -71,7 +71,7 @@ impl TryFrom<Result<String, sys_info::Error>> for OperatingSystem {
 
 impl OperatingSystem {
     pub fn discover() -> Result<Self, Error> {
-        Ok(OperatingSystem::try_from(sys_info::os_type())?)
+        OperatingSystem::try_from(sys_info::os_type())
     }
 }
 
