@@ -6,3 +6,8 @@ authors = ["Samuel Oliveira <samuel@beasync.com>"]
 
 [dependencies]
 sys-info = "0.9.1"
+
+[features]
+arch = []
+ubuntu = []
+darwin = []
