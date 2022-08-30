@@ -65,15 +65,9 @@ impl Vendor {
                 let distro = <DS>::get_distro_id()?;
                 let distro = DistroID::try_from(distro)?;
 
-                Ok(Self {
-                    0: vendor_id,
-                    1: Some(distro),
-                })
+                Ok(Self(vendor_id, Some(distro)))
             }
-            VendorID::MacOS => Ok(Self {
-                0: vendor_id,
-                1: None,
-            }),
+            VendorID::MacOS => Ok(Self(vendor_id, None)),
         }
     }
 }

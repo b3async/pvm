@@ -16,11 +16,9 @@ impl DiscoveryService for SysInfo {
             }
         };
 
-        let distro_id = release
+        release
             .id_like
-            .ok_or(Self::Error::Failed(format!("unable to discover distro id")));
-
-        distro_id
+            .ok_or(Self::Error::Failed("unable to discover distro id".to_string()))
     }
 
     fn get_vendor_id() -> Result<String, Self::Error> {
