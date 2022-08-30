@@ -1,4 +1,4 @@
-use lenaris::OperatingSystem;
+use lenaris::{Vendor, SysInfo};
 use std::fs::create_dir_all;
 
 #[macro_export]
@@ -48,7 +48,7 @@ fn initialize_pvm_folders() -> std::io::Result<()> {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let _operating_system = OperatingSystem::discover()?;
+    let _operating_system = Vendor::discover::<SysInfo>()?;
 
     initialize_pvm_folders()?;
 
