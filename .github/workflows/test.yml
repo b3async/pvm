@@ -10,6 +10,11 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            feature: ubuntu
+          - os: macos-latest
+            feature: darwin
     name: Run cargo test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
@@ -25,5 +30,6 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --features ${{ matrix.feature }}
         env:
           RUST_BACKTRACE: 1
