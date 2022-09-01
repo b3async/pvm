@@ -1,5 +1,9 @@
-use lenaris::{Vendor, SysInfo};
-use std::fs::create_dir_all;
+mod context;
+mod error;
+
+use crate::context::Context;
+use std::error::Error;
+use std::sync::Arc;
 
 #[macro_export]
 macro_rules! pvm_path {
@@ -13,7 +17,7 @@ macro_rules! pvm_path {
             path.push($path);
         )+
 
-        &path.clone()
+        path.clone()
     }};
 
     ($path:expr) => {
@@ -35,22 +39,12 @@ macro_rules! pvm_versions_path {
     };
 }
 
-fn initialize_pvm_folders() -> std::io::Result<()> {
-    if !pvm_build_path!().exists() {
-        create_dir_all(pvm_build_path!())?;
-    }
+fn main() -> Result<(), Box<dyn Error>> {
+    let ctx = Arc::new(Context::default());
 
-    if !pvm_versions_path!().exists() {
-        create_dir_all(pvm_versions_path!())?;
-    }
+    ctx.init()?;
 
-    Ok(())
-}
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let _operating_system = Vendor::discover::<SysInfo>()?;
-
-    initialize_pvm_folders()?;
+    println!("{:?}", ctx.vendor());
 
     Ok(())
 }

@@ -1,7 +1,7 @@
 mod services;
 pub use services::SysInfo;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DistroID {
     Arch,
     Debian,
@@ -23,7 +23,7 @@ impl TryFrom<String> for DistroID {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum VendorID {
     Linux,
     MacOS,
@@ -50,6 +50,7 @@ pub trait DiscoveryService {
     fn get_vendor_id() -> Result<String, Self::Error>;
 }
 
+#[derive(Debug, Clone)]
 pub struct Vendor(pub VendorID, pub Option<DistroID>);
 
 impl Vendor {
