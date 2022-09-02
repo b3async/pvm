@@ -1,9 +1,10 @@
+mod actions;
 mod context;
 mod error;
 
 use crate::context::Context;
 use std::error::Error;
-use std::sync::Arc;
+use structopt::StructOpt;
 
 #[macro_export]
 macro_rules! pvm_path {
@@ -39,19 +40,41 @@ macro_rules! pvm_versions_path {
     };
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let ctx = Arc::new(Context::default());
+#[derive(StructOpt, PartialEq, Eq, Debug)]
+#[structopt(name = "PVM", about = "A PHP Version Manager")]
+enum Command {
+    #[structopt(about = "List all PHP versions currently installed")]
+    LS,
+    #[structopt(about = "Inspect a PHP installation")]
+    Inspect { version: String },
+    #[structopt(about = "Remove a PHP installation")]
+    Remove { version: String },
+    #[structopt(about = "Install a PHP version")]
+    Add { version: String },
+    #[structopt(about = "Activate a PHP version")]
+    Use { version: String },
+}
 
+fn main() -> Result<(), Box<dyn Error>> {
+    let ctx = Context::default();
     ctx.init()?;
 
-    println!("{:?}", ctx.vendor());
+    let command: Command = Command::from_args();
+
+    match command {
+        Command::LS => actions::list_installations(&ctx),
+        Command::Inspect { version } => actions::inspect_installation(version, &ctx),
+        Command::Remove { version } => actions::remove_installation(version, &ctx),
+        Command::Add { version } => actions::add_installation(version, &ctx),
+        Command::Use { version } => actions::activate_installation(version, &ctx),
+    }
 
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
-    use super::pvm_path;
+    use super::*;
 
     #[test]
     fn can_build_pvm_paths() {
@@ -86,6 +109,51 @@ mod tests {
         assert_eq!(
             format!("{home_dir}/.pvm/versions").as_str(),
             versions_path.as_path().to_str().unwrap()
+        );
+    }
+
+    #[test]
+    fn can_parse_ls_cmd() {
+        assert_eq!(Command::from_iter(&["pvm", "ls"]), Command::LS);
+    }
+
+    #[test]
+    fn can_parse_inspect_cmd() {
+        assert_eq!(
+            Command::from_iter(&["pvm", "inspect", "8.1.9"]),
+            Command::Inspect {
+                version: "8.1.9".to_owned()
+            }
+        );
+    }
+
+    #[test]
+    fn can_parse_remove_cmd() {
+        assert_eq!(
+            Command::from_iter(&["pvm", "remove", "8.1.9"]),
+            Command::Remove {
+                version: "8.1.9".to_owned()
+            }
+        );
+    }
+
+    #[test]
+    fn can_parse_add_cmd() {
+        assert_eq!(
+            Command::from_iter(&["pvm", "add", "8.1.9"]),
+            Command::Add {
+                version: "8.1.9".to_owned()
+            }
+        );
+    }
+
+    #[test]
+    fn can_parse_use_cmd() {
+        assert_eq!(
+            Command::from_iter(&["pvm", "use", "8.1.9"]),
+            Command::Use {
+                version: "8.1.9".to_owned()
+            }
         );
     }
 }
