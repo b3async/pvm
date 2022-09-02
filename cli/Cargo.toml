@@ -10,3 +10,4 @@ path = "src/main.rs"
 
 [dependencies]
 lenaris = { path = "../lenaris" }
+structopt = "0.3.26"
